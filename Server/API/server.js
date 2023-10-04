@@ -3,6 +3,9 @@ const fs = require('fs');
 const app = express();
 const port = 5000;
 const cors = require('cors');
+const { CourierClient } = require("@trycourier/courier");
+const courier = CourierClient({ authorizationToken: "pk_prod_6SK6BV4FM1MAVEGCKXAH95TGPWNG" });
+
 app.use(cors());
 app.use(express.json());
 // let matlabData = null;
@@ -61,8 +64,34 @@ app.get('/excelcell', (req, res) => {
       });
 });
 
+app.post('/send-courier-message', async (req, res) => {
+  try {
+    const { requestId } = await courier.send({
+      message: {
+        to: {
+          email: "agrochain.sih@gmail.com",
+        },
+        template: "FT0VS9003CMDN9MDZVE4VTVD8Q57",
+        data: {
+          username: "AgroChain",
+          param_name: "Temperature",
+          param_value: "30",
+        },
+      },
+    });
+
+    // Respond with the request ID or any other response as needed
+    res.json({ requestId });
+  } catch (error) {
+    console.error('Error sending Courier message:', error);
+    res.status(500).json({ error: 'Error sending Courier message.' });
+  }
+});
+
+
 // Initial read of the JSON file
 function readJSONFile() {
+  
   try {
     const data = fs.readFileSync('../../Client/src/matlabData.json', 'utf8');
     matlabData = JSON.parse(data);
